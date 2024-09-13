@@ -1,39 +1,49 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { HomeIcon, PlusCircleIcon, ChartBarIcon } from '@heroicons/react/24/solid'
 
 export default function BottomBar() {
   const pathname = usePathname()
 
+  const navItems = [
+    { href: '/', icon: HomeIcon, label: 'Ana Sayfa' },
+    { href: '/add-transaction', icon: PlusCircleIcon, color: 'bg-green-500' },
+    { href: '/status', icon: ChartBarIcon },
+  ]
+
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white py-2 px-4">
-      <div className="max-w-screen-xl mx-auto flex justify-around items-center">
-        <Link 
-          href="/" 
-          className={`flex flex-col items-center ${pathname === '/' ? 'text-blue-500' : ''}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-          </svg>
-          <span className="text-xs mt-1">Anasayfa</span>
-        </Link>
-        <Link 
-          href="/add-transaction" 
-          className={`flex flex-col items-center ${pathname === '/add-transaction' ? 'text-blue-500' : ''}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-          <span className="text-xs mt-1">Ekle</span>
-        </Link>
-        <Link 
-          href="/status" 
-          className={`flex flex-col items-center ${pathname === '/status' ? 'text-blue-500' : ''}`}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-          </svg>
-          <span className="text-xs mt-1">Durum</span>
-        </Link>
+    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2">
+      <div className="bg-gray-800 rounded-full shadow-lg px-4 py-2">
+        <nav className="flex items-center justify-center">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            const isAddButton = item.href === '/add-transaction'
+            const shouldBeGreen = isAddButton && pathname !== '/status'
+            return (
+              <Link 
+                key={item.href}
+                href={item.href} 
+                className={`
+                  relative flex items-center justify-center
+                  w-12 h-12 rounded-full mx-2
+                  transition-all duration-300 ease-in-out
+                  ${isActive 
+                    ? (item.color || 'bg-indigo-500') + ' text-white' 
+                    : shouldBeGreen
+                      ? 'bg-green-500 text-white'
+                      : 'text-gray-400 hover:bg-gray-700'}
+                `}
+              >
+                <item.icon className="h-6 w-6" />
+                {isActive && item.label && (
+                  <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 ${item.color || 'bg-indigo-500'} text-white text-xs py-1 px-2 rounded-full whitespace-nowrap`}>
+                    {item.label}
+                  </span>
+                )}
+              </Link>
+            )
+          })}
+        </nav>
       </div>
     </div>
   )

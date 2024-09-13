@@ -84,6 +84,8 @@ export default function Status() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly')
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>('TRY')
 
   useEffect(() => {
     const storedTransactions = localStorage.getItem('transactions')
@@ -128,8 +130,30 @@ export default function Status() {
     return frequencyMap[frequency]
   }
 
-  const incomes = transactions.filter(t => t.type === 'income')
-  const expenses = transactions.filter(t => t.type === 'expense')
+  const formatCurrency = (amount: number, currency: Currency): string => {
+    return amount.toLocaleString(currency === 'TRY' ? 'tr-TR' : 'en-US', {
+      style: 'currency',
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  }
+
+  const calculateTotal = (transactions: Transaction[], type: TransactionType, currency: Currency) => {
+    return transactions
+      .filter(t => t.type === type && t.currency === currency)
+      .reduce((total, t) => {
+        let amount = t.amount
+        if (t.frequency === 'weekly') amount *= 4
+        if (t.frequency === 'yearly' && selectedPeriod === 'monthly') amount /= 12
+        if (t.frequency === 'monthly' && selectedPeriod === 'yearly') amount *= 12
+        return total + amount
+      }, 0)
+  }
+
+  const totalIncome = calculateTotal(transactions, 'income', selectedCurrency)
+  const totalExpense = calculateTotal(transactions, 'expense', selectedCurrency)
+  const balance = totalIncome - totalExpense
 
   return (
     <div className="min-h-screen bg-black text-white pb-16">
@@ -193,37 +217,73 @@ export default function Status() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-semibold mb-6">Durum</h2>
 
+        {/* Dönem ve para birimi seçimi */}
+        <div className="mb-4 flex space-x-4">
+          <select 
+            value={selectedPeriod} 
+            onChange={(e) => setSelectedPeriod(e.target.value as 'monthly' | 'yearly')}
+            className="bg-gray-700 text-white p-2 rounded"
+          >
+            <option value="monthly">Aylık</option>
+            <option value="yearly">Yıllık</option>
+          </select>
+          <select 
+            value={selectedCurrency} 
+            onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
+            className="bg-gray-700 text-white p-2 rounded"
+          >
+            <option value="TRY">TRY</option>
+            <option value="USD">USD</option>
+          </select>
+        </div>
+
+        {/* Özet bilgiler */}
+        <div className="bg-gray-800 p-4 rounded-lg mb-8">
+          <h3 className="text-xl font-semibold mb-2">{selectedPeriod === 'monthly' ? 'Aylık' : 'Yıllık'} Özet ({selectedCurrency})</h3>
+          <p className="text-green-500">Toplam Gelir: {formatCurrency(totalIncome, selectedCurrency)}</p>
+          <p className="text-red-500">Toplam Gider: {formatCurrency(totalExpense, selectedCurrency)}</p>
+          <p className={balance >= 0 ? "text-green-500" : "text-red-500"}>
+            Bakiye: {formatCurrency(balance, selectedCurrency)}
+          </p>
+        </div>
+
         {/* Gelirler */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-green-500">Gelirler</h3>
+          <h3 className="text-xl font-semibold mb-4 text-green-500">Gelirler ({selectedCurrency})</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {incomes.map(transaction => (
-              <TransactionCard
-                key={transaction.id}
-                transaction={transaction}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                formatDate={formatDate}
-                formatFrequency={formatFrequency}
-              />
-            ))}
+            {transactions
+              .filter(t => t.type === 'income' && t.currency === selectedCurrency)
+              .map(transaction => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  formatDate={formatDate}
+                  formatFrequency={formatFrequency}
+                  formatCurrency={formatCurrency}
+                />
+              ))}
           </div>
         </div>
 
         {/* Giderler */}
         <div>
-          <h3 className="text-xl font-semibold mb-4 text-red-500">Giderler</h3>
+          <h3 className="text-xl font-semibold mb-4 text-red-500">Giderler ({selectedCurrency})</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {expenses.map(transaction => (
-              <TransactionCard
-                key={transaction.id}
-                transaction={transaction}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                formatDate={formatDate}
-                formatFrequency={formatFrequency}
-              />
-            ))}
+            {transactions
+              .filter(t => t.type === 'expense' && t.currency === selectedCurrency)
+              .map(transaction => (
+                <TransactionCard
+                  key={transaction.id}
+                  transaction={transaction}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  formatDate={formatDate}
+                  formatFrequency={formatFrequency}
+                  formatCurrency={formatCurrency}
+                />
+              ))}
           </div>
         </div>
       </div>
@@ -251,24 +311,17 @@ interface TransactionCardProps {
   onDelete: (id: string) => void;
   formatDate: (dateString: string) => string;
   formatFrequency: (frequency: Frequency) => string;
+  formatCurrency: (amount: number, currency: Currency) => string;
 }
 
-function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFrequency }: TransactionCardProps) {
-  const formatAmount = (amount: number, currency: string) => {
-    if (currency === 'TRY') {
-      return `${amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).replace('.', ',')} ₺`;
-    } else {
-      return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    }
-  };
-
+function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFrequency, formatCurrency }: TransactionCardProps) {
   return (
     <div className="bg-gray-800 shadow-md rounded-lg p-4">
       <div className="flex justify-between items-start">
         <div>
           <h4 className="font-semibold text-lg">{transaction.description}</h4>
           <p className={`text-xl font-bold ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-            {transaction.type === 'income' ? '+' : '-'} {formatAmount(transaction.amount, transaction.currency)}
+            {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
           </p>
           <p className="text-sm text-gray-400">{formatFrequency(transaction.frequency)}</p>
           <p className="text-sm text-gray-400">{formatDate(transaction.date)}</p>

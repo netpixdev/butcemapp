@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BütçemApp
 
-## Getting Started
+BütçemApp, gelir ve giderlerinizi takip etmenize yardımcı olan açık kaynaklı bir web uygulamasıdır. Basit, hızlı ve güvenli bir şekilde finansal durumunuzu yönetmenizi sağlar.
 
-First, run the development server:
+## Özellikler
 
-```bash
+- 🍪 Reklam, çerez ve üyelik gerektirmez
+- 🔒 Tüm veriler kullanıcının cihazında güvenle saklanır
+- 💰 Gelir ve giderleri kolayca takip etme
+- 📊 Finansal durumunuzu görselleştirme
+- 🌐 Çoklu para birimi desteği
+- 📱 Mobil uyumlu tasarım
+
+## Ekran Görüntüsü
+
+<img src="screenshots/butcemapp-screenshot.png" width="600" alt="BütçemApp Ekran Görüntüsü">
+
+## Nasıl Kullanılır
+
+1. Uygulamayı açın: [BütçemApp](https://butcemapp.vercel.app)
+2. "Uygulamayı Başlat" butonuna tıklayın
+3. Gelir ve giderlerinizi ekleyin
+4. Finansal durumunuzu takip edin
+
+## Teknolojiler
+
+- [Next.js](https://nextjs.org/)
+- [React](https://reactjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [TypeScript](https://www.typescriptlang.org/)
+
+## Yerel Geliştirme
+
+Projeyi yerel makinenizde çalıştırmak için:
+bash
+git clone https://github.com/yourusername/butcemapp.git
+cd butcemapp
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tarayıcınızda `http://localhost:3000` adresini açın.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Katkıda Bulunma
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Katkılarınızı memnuniyetle karşılıyoruz! Lütfen bir Pull Request açın veya bir Issue oluşturun.
 
-## Learn More
+## Lisans
 
-To learn more about Next.js, take a look at the following resources:
+Bu proje [MIT lisansı](LICENSE) altında lisanslanmıştır.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## İletişim
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Geliştirici: [@netpixdev](https://github.com/netpixdev)
 
-## Deploy on Vercel
+Bir sorunuz veya öneriniz varsa, lütfen bir Issue açın veya bana doğrudan ulaşın.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+☕ Bu projeyi beğendiyseniz, bana bir kahve ısmarlayabilirsiniz!
+

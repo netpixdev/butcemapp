@@ -5,7 +5,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import Link from 'next/link'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { TrashIcon, PencilIcon } from '@heroicons/react/24/outline'
 
 type TransactionType = 'income' | 'expense'
 type Frequency = 'once' | 'weekly' | 'monthly' | 'yearly'
@@ -173,8 +173,8 @@ export default function Status() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pb-16">
-      <nav className="bg-black bg-opacity-50 backdrop-blur-md fixed w-full z-10">
+    <div className="min-h-screen bg-black text-gray-100">
+      <nav className="bg-black fixed w-full z-10 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
             <div className="flex-shrink-0 flex items-center">
@@ -231,88 +231,67 @@ export default function Status() {
         )}
       </nav>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="text-2xl font-semibold mb-6">Durum</h2>
+      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-3xl font-bold text-blue-400 mb-8">Finansal Durum</h2>
 
-        {/* Dönem, para birimi seçimi ve veri silme butonu */}
-        <div className="mb-4 flex items-center space-x-4">
-          <select 
-            value={selectedPeriod} 
-            onChange={(e) => setSelectedPeriod(e.target.value as 'monthly' | 'yearly')}
-            className="bg-gray-700 text-white p-2 rounded"
-          >
-            <option value="monthly">Aylık</option>
-            <option value="yearly">Yıllık</option>
-          </select>
-          <select 
-            value={selectedCurrency} 
-            onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
-            className="bg-gray-700 text-white p-2 rounded"
-          >
-            <option value="TRY">TRY</option>
-            <option value="USD">USD</option>
-          </select>
-          {transactions.length > 0 && (
-            <button
-              onClick={handleDeleteAllData}
-              className="text-gray-400 hover:text-red-500 transition-colors duration-300 focus:outline-none"
-              title="Tüm Verileri Sil"
-            >
-              <TrashIcon className="h-5 w-5" />
-            </button>
-          )}
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+            <SummaryCard title="Toplam Gelir" amount={totalIncome} currency={selectedCurrency} type="income" formatCurrency={formatCurrency} />
+            <SummaryCard title="Toplam Gider" amount={totalExpense} currency={selectedCurrency} type="expense" formatCurrency={formatCurrency} />
+            <SummaryCard title="Bakiye" amount={balance} currency={selectedCurrency} type="balance" formatCurrency={formatCurrency} />
+          </div>
 
-        {/* Özet bilgiler */}
-        <div className="bg-gray-800 p-4 rounded-lg mb-8">
-          <h3 className="text-xl font-semibold mb-2">{selectedPeriod === 'monthly' ? 'Aylık' : 'Yıllık'} Özet ({selectedCurrency})</h3>
-          <p className="text-green-500">Toplam Gelir: {formatCurrency(totalIncome, selectedCurrency)}</p>
-          <p className="text-red-500">Toplam Gider: {formatCurrency(totalExpense, selectedCurrency)}</p>
-          <p className={balance >= 0 ? "text-green-500" : "text-red-500"}>
-            Bakiye: {formatCurrency(balance, selectedCurrency)}
-          </p>
-        </div>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-4">
+              <select 
+                value={selectedPeriod} 
+                onChange={(e) => setSelectedPeriod(e.target.value as 'monthly' | 'yearly')}
+                className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="monthly">Aylık</option>
+                <option value="yearly">Yıllık</option>
+              </select>
+              <select 
+                value={selectedCurrency} 
+                onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
+                className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="TRY">TRY</option>
+                <option value="USD">USD</option>
+              </select>
+              {transactions.length > 0 && (
+                <button
+                  onClick={handleDeleteAllData}
+                  className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                >
+                  Tüm Verileri Sil
+                </button>
+              )}
+            </div>
+          </div>
 
-        {/* Gelirler */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-green-500">Gelirler ({selectedCurrency})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {transactions
-              .filter(t => t.type === 'income' && t.currency === selectedCurrency)
-              .map(transaction => (
-                <TransactionCard
-                  key={transaction.id}
-                  transaction={transaction}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  formatDate={formatDate}
-                  formatFrequency={formatFrequency}
-                  formatCurrency={formatCurrency}
-                />
-              ))}
+          <div className="space-y-8">
+            <TransactionSection
+              title="Gelirler"
+              transactions={transactions.filter(t => t.type === 'income' && t.currency === selectedCurrency)}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              formatDate={formatDate}
+              formatFrequency={formatFrequency}
+              formatCurrency={formatCurrency}
+            />
+            <TransactionSection
+              title="Giderler"
+              transactions={transactions.filter(t => t.type === 'expense' && t.currency === selectedCurrency)}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              formatDate={formatDate}
+              formatFrequency={formatFrequency}
+              formatCurrency={formatCurrency}
+            />
           </div>
         </div>
-
-        {/* Giderler */}
-        <div>
-          <h3 className="text-xl font-semibold mb-4 text-red-500">Giderler ({selectedCurrency})</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {transactions
-              .filter(t => t.type === 'expense' && t.currency === selectedCurrency)
-              .map(transaction => (
-                <TransactionCard
-                  key={transaction.id}
-                  transaction={transaction}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                  formatDate={formatDate}
-                  formatFrequency={formatFrequency}
-                  formatCurrency={formatCurrency}
-                />
-              ))}
-          </div>
-        </div>
-      </div>
+      </main>
 
       {editingTransaction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -350,7 +329,52 @@ export default function Status() {
         </div>
       )}
 
-      <ToastContainer />
+      <ToastContainer position="bottom-right" theme="dark" />
+    </div>
+  )
+}
+
+function SummaryCard({ title, amount, currency, type, formatCurrency }: { 
+  title: string; 
+  amount: number; 
+  currency: Currency; 
+  type: 'income' | 'expense' | 'balance';
+  formatCurrency: (amount: number, currency: Currency) => string;
+}) {
+  const bgColor = type === 'income' ? 'bg-green-600' : type === 'expense' ? 'bg-red-600' : 'bg-blue-600'
+  return (
+    <div className={`${bgColor} rounded-lg p-6 shadow-lg`}>
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      <p className="text-3xl font-bold">{formatCurrency(amount, currency)}</p>
+    </div>
+  )
+}
+
+function TransactionSection({ title, transactions, onEdit, onDelete, formatDate, formatFrequency, formatCurrency }: {
+  title: string;
+  transactions: Transaction[];
+  onEdit: (transaction: Transaction) => void;
+  onDelete: (id: string) => void;
+  formatDate: (dateString: string) => string;
+  formatFrequency: (frequency: Frequency) => string;
+  formatCurrency: (amount: number, currency: Currency) => string;
+}) {
+  return (
+    <div>
+      <h3 className="text-2xl font-semibold mb-4 text-blue-400">{title}</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {transactions.map(transaction => (
+          <TransactionCard
+            key={transaction.id}
+            transaction={transaction}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            formatDate={formatDate}
+            formatFrequency={formatFrequency}
+            formatCurrency={formatCurrency}
+          />
+        ))}
+      </div>
     </div>
   )
 }
@@ -366,31 +390,29 @@ interface TransactionCardProps {
 
 function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFrequency, formatCurrency }: TransactionCardProps) {
   return (
-    <div className="bg-gray-800 shadow-md rounded-lg p-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-semibold text-lg">{transaction.description}</h4>
-          <p className={`text-xl font-bold ${transaction.type === 'income' ? 'text-green-500' : 'text-red-500'}`}>
-            {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
-          </p>
-          <p className="text-sm text-gray-400">{formatFrequency(transaction.frequency)}</p>
-          <p className="text-sm text-gray-400">{formatDate(transaction.date)}</p>
-        </div>
-        <div className="flex flex-col space-y-2">
+    <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+      <div className="flex justify-between items-start mb-4">
+        <h4 className="font-semibold text-lg text-blue-300">{transaction.description}</h4>
+        <div className="flex space-x-2">
           <button
             onClick={() => onEdit(transaction)}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition duration-200"
+            className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
           >
-            Düzenle
+            <PencilIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => onDelete(transaction.id)}
-            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition duration-200"
+            className="text-gray-400 hover:text-red-500 transition-colors duration-300"
           >
-            Sil
+            <TrashIcon className="h-5 w-5" />
           </button>
         </div>
       </div>
+      <p className={`text-2xl font-bold mb-2 ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
+        {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
+      </p>
+      <p className="text-sm text-gray-400">{formatFrequency(transaction.frequency)}</p>
+      <p className="text-sm text-gray-400">{formatDate(transaction.date)}</p>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Image from 'next/image'
 import Link from 'next/link'
+import { TrashIcon } from '@heroicons/react/24/outline'
 
 type TransactionType = 'income' | 'expense'
 type Frequency = 'once' | 'weekly' | 'monthly' | 'yearly'
@@ -86,6 +87,7 @@ export default function Status() {
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
   const [selectedPeriod, setSelectedPeriod] = useState<'monthly' | 'yearly'>('monthly')
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>('TRY')
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
   useEffect(() => {
     const storedTransactions = localStorage.getItem('transactions')
@@ -155,6 +157,21 @@ export default function Status() {
   const totalExpense = calculateTotal(transactions, 'expense', selectedCurrency)
   const balance = totalIncome - totalExpense
 
+  const handleDeleteAllData = () => {
+    setShowDeleteConfirmation(true)
+  }
+
+  const confirmDelete = () => {
+    localStorage.removeItem('transactions')
+    setTransactions([])
+    setShowDeleteConfirmation(false)
+    toast.success('Tüm veriler başarıyla silindi!')
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteConfirmation(false)
+  }
+
   return (
     <div className="min-h-screen bg-black text-white pb-16">
       <nav className="bg-black bg-opacity-50 backdrop-blur-md fixed w-full z-10">
@@ -217,8 +234,8 @@ export default function Status() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h2 className="text-2xl font-semibold mb-6">Durum</h2>
 
-        {/* Dönem ve para birimi seçimi */}
-        <div className="mb-4 flex space-x-4">
+        {/* Dönem, para birimi seçimi ve veri silme butonu */}
+        <div className="mb-4 flex items-center space-x-4">
           <select 
             value={selectedPeriod} 
             onChange={(e) => setSelectedPeriod(e.target.value as 'monthly' | 'yearly')}
@@ -235,6 +252,15 @@ export default function Status() {
             <option value="TRY">TRY</option>
             <option value="USD">USD</option>
           </select>
+          {transactions.length > 0 && (
+            <button
+              onClick={handleDeleteAllData}
+              className="text-gray-400 hover:text-red-500 transition-colors duration-300 focus:outline-none"
+              title="Tüm Verileri Sil"
+            >
+              <TrashIcon className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Özet bilgiler */}
@@ -296,6 +322,30 @@ export default function Status() {
               onSave={handleSave}
               onCancel={() => setEditingTransaction(null)}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Silme Onayı Popup'ı */}
+      {showDeleteConfirmation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-red-600 text-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+            <h3 className="text-xl font-bold mb-4">Dikkat!</h3>
+            <p className="mb-6">Tüm verileriniz silinecek. Bu işlem geri alınamaz. Onaylıyor musunuz?</p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={cancelDelete}
+                className="px-4 py-2 bg-white text-red-600 rounded hover:bg-red-100 transition-colors"
+              >
+                İptal
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition-colors"
+              >
+                Sil
+              </button>
+            </div>
           </div>
         </div>
       )}

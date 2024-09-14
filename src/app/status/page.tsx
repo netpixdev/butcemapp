@@ -92,7 +92,9 @@ export default function Status() {
   useEffect(() => {
     const storedTransactions = localStorage.getItem('transactions')
     if (storedTransactions) {
-      setTransactions(JSON.parse(storedTransactions))
+      const parsedTransactions = JSON.parse(storedTransactions)
+      console.log('Loaded transactions:', parsedTransactions) // Debugging için
+      setTransactions(parsedTransactions)
     }
   }, [])
 
@@ -123,13 +125,14 @@ export default function Status() {
   }
 
   const formatFrequency = (frequency: Frequency) => {
+    console.log('Formatting frequency:', frequency) // Debugging için
     const frequencyMap: { [key in Frequency]: string } = {
       once: 'Tek Seferlik',
       weekly: 'Haftalık',
       monthly: 'Aylık',
       yearly: 'Yıllık'
     }
-    return frequencyMap[frequency]
+    return frequencyMap[frequency] || 'Bilinmeyen Sıklık'
   }
 
   const formatCurrency = (amount: number, currency: Currency): string => {
@@ -145,13 +148,38 @@ export default function Status() {
     return transactions
       .filter(t => t.type === type && t.currency === currency)
       .reduce((total, t) => {
-        let amount = t.amount
-        if (t.frequency === 'weekly') amount *= 4
-        if (t.frequency === 'yearly' && selectedPeriod === 'monthly') amount /= 12
-        if (t.frequency === 'monthly' && selectedPeriod === 'yearly') amount *= 12
-        return total + amount
-      }, 0)
-  }
+        let amount = t.amount;
+        const currentDate = new Date();
+        const transactionDate = new Date(t.date);
+
+        switch (t.frequency) {
+          case 'once':
+            // Tek seferlik işlemler için, sadece seçili dönem içindeyse ekle
+            if (selectedPeriod === 'monthly' && 
+                transactionDate.getMonth() === currentDate.getMonth() && 
+                transactionDate.getFullYear() === currentDate.getFullYear()) {
+              return total + amount;
+            } else if (selectedPeriod === 'yearly' && 
+                       transactionDate.getFullYear() === currentDate.getFullYear()) {
+              return total + amount;
+            }
+            return total;
+          case 'weekly':
+            // Haftalık işlemler için, aylık 4 hafta, yıllık 52 hafta olarak hesapla
+            amount *= selectedPeriod === 'monthly' ? 4 : 52;
+            break;
+          case 'monthly':
+            // Aylık işlemler için, yıllık seçilmişse 12 ile çarp
+            if (selectedPeriod === 'yearly') amount *= 12;
+            break;
+          case 'yearly':
+            // Yıllık işlemler için, aylık seçilmişse 12'ye böl
+            if (selectedPeriod === 'monthly') amount /= 12;
+            break;
+        }
+        return total + amount;
+      }, 0);
+  };
 
   const totalIncome = calculateTotal(transactions, 'income', selectedCurrency)
   const totalExpense = calculateTotal(transactions, 'expense', selectedCurrency)
@@ -173,8 +201,8 @@ export default function Status() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-100">
-      <nav className="bg-black fixed w-full z-10 border-b border-gray-800">
+    <div className="min-h-screen bg-black text-gray-300">
+      <nav className="bg-gray-900 fixed w-full z-10 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
             <div className="flex-shrink-0 flex items-center">
@@ -231,22 +259,22 @@ export default function Status() {
         )}
       </nav>
 
-      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl font-bold text-blue-400 mb-8">Finansal Durum</h2>
+      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+        <div className="bg-gray-900 rounded-lg shadow-xl p-6 sm:p-10 border border-gray-800">
+          <h2 className="text-3xl font-bold text-blue-400 mb-8 text-center">Finansal Durum</h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             <SummaryCard title="Toplam Gelir" amount={totalIncome} currency={selectedCurrency} type="income" formatCurrency={formatCurrency} />
             <SummaryCard title="Toplam Gider" amount={totalExpense} currency={selectedCurrency} type="expense" formatCurrency={formatCurrency} />
             <SummaryCard title="Bakiye" amount={balance} currency={selectedCurrency} type="balance" formatCurrency={formatCurrency} />
           </div>
 
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row items-center justify-between mb-8 space-y-4 sm:space-y-0">
             <div className="flex items-center space-x-4">
               <select 
                 value={selectedPeriod} 
                 onChange={(e) => setSelectedPeriod(e.target.value as 'monthly' | 'yearly')}
-                className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-gray-800 text-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="monthly">Aylık</option>
                 <option value="yearly">Yıllık</option>
@@ -254,20 +282,20 @@ export default function Status() {
               <select 
                 value={selectedCurrency} 
                 onChange={(e) => setSelectedCurrency(e.target.value as Currency)}
-                className="bg-gray-800 text-white p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="bg-gray-800 text-gray-300 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="TRY">TRY</option>
                 <option value="USD">USD</option>
               </select>
-              {transactions.length > 0 && (
-                <button
-                  onClick={handleDeleteAllData}
-                  className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-4 py-2 rounded-md text-sm transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                  Tüm Verileri Sil
-                </button>
-              )}
             </div>
+            {transactions.length > 0 && (
+              <button
+                onClick={handleDeleteAllData}
+                className="bg-red-900 hover:bg-red-800 text-white px-4 py-2 rounded-md text-sm transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-red-700"
+              >
+                Tüm Verileri Sil
+              </button>
+            )}
           </div>
 
           <div className="space-y-8">
@@ -308,19 +336,19 @@ export default function Status() {
       {/* Silme Onayı Popup'ı */}
       {showDeleteConfirmation && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-red-600 text-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
+          <div className="bg-red-900 text-white p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
             <h3 className="text-xl font-bold mb-4">Dikkat!</h3>
             <p className="mb-6">Tüm verileriniz silinecek. Bu işlem geri alınamaz. Onaylıyor musunuz?</p>
             <div className="flex justify-end space-x-4">
               <button
                 onClick={cancelDelete}
-                className="px-4 py-2 bg-white text-red-600 rounded hover:bg-red-100 transition-colors"
+                className="px-4 py-2 bg-white text-red-900 rounded hover:bg-red-100 transition-colors"
               >
                 İptal
               </button>
               <button
                 onClick={confirmDelete}
-                className="px-4 py-2 bg-red-700 text-white rounded hover:bg-red-800 transition-colors"
+                className="px-4 py-2 bg-red-800 text-white rounded hover:bg-red-700 transition-colors"
               >
                 Sil
               </button>
@@ -341,11 +369,11 @@ function SummaryCard({ title, amount, currency, type, formatCurrency }: {
   type: 'income' | 'expense' | 'balance';
   formatCurrency: (amount: number, currency: Currency) => string;
 }) {
-  const bgColor = type === 'income' ? 'bg-green-600' : type === 'expense' ? 'bg-red-600' : 'bg-blue-600'
+  const bgColor = type === 'income' ? 'bg-green-900' : type === 'expense' ? 'bg-red-900' : 'bg-blue-900'
   return (
-    <div className={`${bgColor} rounded-lg p-6 shadow-lg`}>
-      <h3 className="text-lg font-semibold mb-2">{title}</h3>
-      <p className="text-3xl font-bold">{formatCurrency(amount, currency)}</p>
+    <div className={`${bgColor} rounded-lg p-6 shadow-lg transition-transform hover:scale-105 border border-gray-700`}>
+      <h3 className="text-lg font-semibold mb-2 text-gray-300">{title}</h3>
+      <p className="text-3xl font-bold text-white">{formatCurrency(amount, currency)}</p>
     </div>
   )
 }
@@ -389,20 +417,21 @@ interface TransactionCardProps {
 }
 
 function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFrequency, formatCurrency }: TransactionCardProps) {
+  console.log('Rendering transaction:', transaction) // Debugging için
   return (
-    <div className="bg-gray-800 rounded-lg p-6 shadow-md">
+    <div className="bg-gray-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-700">
       <div className="flex justify-between items-start mb-4">
         <h4 className="font-semibold text-lg text-blue-300">{transaction.description}</h4>
         <div className="flex space-x-2">
           <button
             onClick={() => onEdit(transaction)}
-            className="text-gray-400 hover:text-blue-500 transition-colors duration-300"
+            className="text-gray-400 hover:text-blue-400 transition-colors duration-300"
           >
             <PencilIcon className="h-5 w-5" />
           </button>
           <button
             onClick={() => onDelete(transaction.id)}
-            className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+            className="text-gray-400 hover:text-red-400 transition-colors duration-300"
           >
             <TrashIcon className="h-5 w-5" />
           </button>
@@ -411,8 +440,8 @@ function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFreq
       <p className={`text-2xl font-bold mb-2 ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
         {transaction.type === 'income' ? '+' : '-'} {formatCurrency(transaction.amount, transaction.currency)}
       </p>
-      <p className="text-sm text-gray-400">{formatFrequency(transaction.frequency)}</p>
-      <p className="text-sm text-gray-400">{formatDate(transaction.date)}</p>
+      <p className="text-sm text-gray-400">Sıklık: {formatFrequency(transaction.frequency)}</p>
+      <p className="text-sm text-gray-400">Tarih: {formatDate(transaction.date)}</p>
     </div>
   )
 }

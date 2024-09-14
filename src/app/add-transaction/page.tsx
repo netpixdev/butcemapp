@@ -23,15 +23,17 @@ interface Transaction {
 }
 
 export default function AddTransaction() {
+  // Bugünün tarihini YYYY-MM-DD formatında al
+  const today = new Date().toISOString().split('T')[0];
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [transactionType, setTransactionType] = useState<TransactionType>('income')
-  const [amount, setAmount] = useState('')
+  const [amount, setAmount] = useState<string>('')
   const [description, setDescription] = useState('')
-  const [frequency, setFrequency] = useState<Frequency>('once')
-  const [currency, setCurrency] = useState<Currency>('TRY')
-  const [date, setDate] = useState('')
-  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [selectedFrequency, setSelectedFrequency] = useState<Frequency>('once')
+  const [currency, setCurrency] = useState<Currency>('TRY')
+  const [date, setDate] = useState(today)
+  const [transactions, setTransactions] = useState<Transaction[]>([])
 
   useEffect(() => {
     const storedTransactions = localStorage.getItem('transactions')
@@ -42,15 +44,19 @@ export default function AddTransaction() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('Submitting with frequency:', selectedFrequency) // Debugging için
     const newTransaction: Transaction = {
       id: Date.now().toString(),
       type: transactionType,
       amount: parseFloat(amount),
       description,
-      frequency,
+      frequency: selectedFrequency,
       currency,
       date
     }
+    
+    console.log('Saving transaction:', newTransaction) // Debugging için
+
     const updatedTransactions = [...transactions, newTransaction]
     setTransactions(updatedTransactions)
     localStorage.setItem('transactions', JSON.stringify(updatedTransactions))
@@ -58,8 +64,8 @@ export default function AddTransaction() {
     // Form alanlarını temizle
     setAmount('')
     setDescription('')
-    setFrequency('once')
-    setDate('')
+    setSelectedFrequency('once') // Eğer formu sıfırlamak istiyorsanız
+    setDate(today)
 
     // Bildirim göster
     toast.success(`${transactionType === 'income' ? 'Gelir' : 'Gider'} başarıyla eklendi!`, {
@@ -73,7 +79,7 @@ export default function AddTransaction() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-100">
+    <div className="min-h-screen bg-black text-gray-100 flex flex-col">
       {/* Menü */}
       <nav className="bg-black bg-opacity-50 backdrop-blur-md fixed w-full z-10">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
@@ -134,125 +140,129 @@ export default function AddTransaction() {
       </nav>
 
       {/* Ana içerik */}
-      <main className="pt-32 pb-8 px-4 sm:px-6 lg:px-8 max-w-md mx-auto">
-        <div className="bg-black shadow-2xl rounded-3xl overflow-hidden border border-gray-800">
-          <div className="p-8">
-            <h2 className="text-3xl font-bold text-center text-white mb-8">Yeni İşlem</h2>
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setTransactionType('income')}
-                  className={`flex-1 py-3 px-4 rounded-full text-sm font-medium transition-colors duration-200 flex items-center justify-center ${
-                    transactionType === 'income' 
-                      ? 'bg-green-600 text-white' 
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  <PlusIcon className="h-5 w-5 mr-2" />
-                  Gelir
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTransactionType('expense')}
-                  className={`flex-1 py-3 px-4 rounded-full text-sm font-medium transition-colors duration-200 flex items-center justify-center ${
-                    transactionType === 'expense' 
-                      ? 'bg-red-600 text-white' 
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  <MinusIcon className="h-5 w-5 mr-2" />
-                  Gider
-                </button>
-              </div>
-              
-              <div className="relative">
-                <input
-                  type="text"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  className="block w-full pl-4 pr-20 py-3 bg-gray-800 border-0 rounded-lg text-2xl font-bold text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
-                  placeholder="0.00"
-                />
-                <div className="absolute inset-y-0 right-0 flex items-center">
-                  <select
-                    value={currency}
-                    onChange={(e) => setCurrency(e.target.value as Currency)}
-                    className="h-full py-0 pl-2 pr-7 border-0 bg-gray-700 text-gray-400 sm:text-sm rounded-md focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="TRY">₺</option>
-                    <option value="USD">$</option>
-                  </select>
-                </div>
-              </div>
-              
+      <main className="flex-grow flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center text-white mb-6 sm:mb-8">Yeni İşlem</h2>
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 bg-gray-900 shadow-2xl rounded-3xl p-6 sm:p-8">
+            <div className="flex space-x-2">
+              <button
+                type="button"
+                onClick={() => setTransactionType('income')}
+                className={`flex-1 py-3 px-4 rounded-full text-sm font-medium transition-colors duration-200 flex items-center justify-center ${
+                  transactionType === 'income' 
+                    ? 'bg-green-600 text-white' 
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <PlusIcon className="h-5 w-5 mr-2" />
+                Gelir
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransactionType('expense')}
+                className={`flex-1 py-3 px-4 rounded-full text-sm font-medium transition-colors duration-200 flex items-center justify-center ${
+                  transactionType === 'expense' 
+                    ? 'bg-red-600 text-white' 
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                }`}
+              >
+                <MinusIcon className="h-5 w-5 mr-2" />
+                Gider
+              </button>
+            </div>
+            
+            <div className="relative">
               <input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className="w-full py-3 px-4 bg-gray-800 border-0 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 font-medium"
-                placeholder="Açıklama"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                className="block w-full pl-4 pr-20 py-3 bg-gray-800 border-0 rounded-lg text-2xl font-bold text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500"
+                placeholder="0.00"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center">
+                <select
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value as Currency)}
+                  className="h-full py-0 pl-2 pr-7 border-0 bg-gray-700 text-gray-400 sm:text-sm rounded-md focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="TRY">₺</option>
+                  <option value="USD">$</option>
+                </select>
+              </div>
+            </div>
+            
+            <input
+              type="text"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full py-3 px-4 bg-gray-800 border-0 rounded-lg text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 font-medium"
+              placeholder="Açıklama"
+              required
+            />
+            
+            <div className="w-full relative">
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full py-3 px-4 bg-gray-800 border-0 rounded-lg text-white focus:ring-2 focus:ring-blue-500 appearance-none text-center"
                 required
               />
-              
-              <RadioGroup value={selectedFrequency} onChange={setSelectedFrequency}>
-                <RadioGroup.Label className="text-sm font-medium text-gray-400 mb-2 block">Sıklık Türü</RadioGroup.Label>
-                <div className="bg-gray-800 rounded-lg p-3 grid grid-cols-2 gap-3">
-                  {['once', 'weekly', 'monthly', 'yearly'].map((freq) => (
-                    <RadioGroup.Option
-                      key={freq}
-                      value={freq}
-                      className={({ active, checked }) =>
-                        `${active ? 'ring-2 ring-blue-500' : ''}
-                        ${checked ? 'bg-blue-600 text-white' : 'bg-gray-700'}
-                          relative rounded-lg shadow-md px-5 py-4 cursor-pointer flex items-center justify-center h-16 focus:outline-none`
-                      }
-                    >
-                      {({ checked }) => (
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center">
-                            <div className="text-sm">
-                              <RadioGroup.Label
-                                as="p"
-                                className={`font-medium  ${
-                                  checked ? 'text-white' : 'text-gray-300'
-                                }`}
-                              >
-                                {freq === 'once' ? 'Tek Seferlik' :
-                                 freq === 'weekly' ? 'Haftalık' :
-                                 freq === 'monthly' ? 'Aylık' : 'Yıllık'}
-                              </RadioGroup.Label>
-                            </div>
+            </div>
+            
+            <RadioGroup value={selectedFrequency} onChange={setSelectedFrequency}>
+              <RadioGroup.Label className="text-sm font-medium text-gray-400 mb-2 block">Sıklık Türü</RadioGroup.Label>
+              <div className="bg-gray-800 rounded-lg p-3 grid grid-cols-2 gap-3">
+                {['once', 'weekly', 'monthly', 'yearly'].map((freq) => (
+                  <RadioGroup.Option
+                    key={freq}
+                    value={freq}
+                    className={({ active, checked }) =>
+                      `${active ? 'ring-2 ring-blue-500' : ''}
+                      ${checked ? 'bg-blue-600 text-white' : 'bg-gray-700'}
+                        relative rounded-lg shadow-md px-5 py-4 cursor-pointer flex items-center justify-center h-16 focus:outline-none`
+                    }
+                  >
+                    {({ checked }) => (
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center">
+                          <div className="text-sm">
+                            <RadioGroup.Label
+                              as="p"
+                              className={`font-medium  ${
+                                checked ? 'text-white' : 'text-gray-300'
+                              }`}
+                            >
+                              {freq === 'once' ? 'Tek Seferlik' :
+                               freq === 'weekly' ? 'Haftalık' :
+                               freq === 'monthly' ? 'Aylık' : 'Yıllık'}
+                            </RadioGroup.Label>
                           </div>
-                          {checked && (
-                            <div className="flex-shrink-0 text-white">
-                              <CheckIcon className="w-6 h-6" />
-                            </div>
-                          )}
                         </div>
-                      )}
-                    </RadioGroup.Option>
-                  ))}
-                </div>
-              </RadioGroup>
-              
-              <div className="flex space-x-4">
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="flex-1 py-3 px-4 bg-gray-800 border-0 rounded-lg text-white focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="flex-1 py-3 px-6 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  İşlemi Kaydet
-                </button>
+                        {checked && (
+                          <div className="flex-shrink-0 text-white">
+                            <CheckIcon className="w-6 h-6" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </RadioGroup.Option>
+                ))}
               </div>
-            </form>
-          </div>
+            </RadioGroup>
+            
+            <div className="pt-4">
+              <button
+                type="submit"
+                className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                İşlemi Kaydet
+              </button>
+            </div>
+          </form>
         </div>
       </main>
 

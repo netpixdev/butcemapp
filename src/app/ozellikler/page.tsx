@@ -19,28 +19,37 @@ export default function Ozellikler() {
   ]
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-black text-gray-100 flex flex-col">
+      {/* Menü */}
       <nav className="bg-black bg-opacity-50 backdrop-blur-md fixed w-full z-10">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
-          <div className="flex items-center justify-between h-14">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <Image src="/logo.webp" alt="ButcemApp Logo" width={28} height={28} className="mr-2" />
-                <Link href="/" className="text-white font-bold text-lg">ButcemApp</Link>
-              </div>
-              <div className="hidden sm:block sm:ml-6">
-                <div className="flex space-x-4">
-                  <Link href="/" className="text-gray-100 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Ana Sayfa</Link>
-                  <Link href="/ozellikler" className="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">Özellikler</Link>
-                  <Link href="/sss" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">SSS</Link>
-                  <Link href="/iletisim" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">İletişim</Link>
-                </div>
+        <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="relative flex items-center justify-between h-16">
+            {/* Logo ve Uygulama Adı */}
+            <div className="flex-shrink-0 flex items-center">
+              <Link href="/" className="flex items-center">
+                <Image src="/logo.webp" alt="Logo" width={32} height={32} className="mr-2" />
+                <span className="text-white font-bold text-lg">BütçemApp</span>
+              </Link>
+            </div>
+
+            {/* Desktop Menu */}
+            <div className="hidden sm:block sm:ml-6">
+              <div className="flex space-x-4">
+                <Link href="/" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Ana Sayfa</Link>
+                <Link href="/ozellikler" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Özellikler</Link>
+                <Link href="/sss" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">SSS</Link>
+                <Link href="/iletisim" className="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">İletişim</Link>
               </div>
             </div>
-            <div className="-mr-2 flex sm:hidden">
+
+            {/* Mobile menu button */}
+            <div className="flex sm:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                type="button"
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                aria-controls="mobile-menu"
+                aria-expanded="false"
               >
                 <span className="sr-only">Open main menu</span>
                 {!isMenuOpen ? (
@@ -56,11 +65,13 @@ export default function Ozellikler() {
             </div>
           </div>
         </div>
+
+        {/* Mobile menu, show/hide based on menu state */}
         {isMenuOpen && (
-          <div className="sm:hidden">
+          <div className="sm:hidden" id="mobile-menu">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link href="/" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Ana Sayfa</Link>
-              <Link href="/ozellikler" className="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium">Özellikler</Link>
+              <Link href="/ozellikler" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Özellikler</Link>
               <Link href="/sss" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">SSS</Link>
               <Link href="/iletisim" className="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">İletişim</Link>
             </div>

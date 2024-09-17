@@ -201,17 +201,19 @@ export default function Status() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-gray-300">
-      <nav className="bg-gray-900 fixed w-full z-10 border-b border-gray-800">
+    <div className="min-h-screen bg-black text-gray-100 flex flex-col">
+      {/* Menü */}
+      <nav className="bg-black bg-opacity-50 backdrop-blur-md fixed w-full z-10">
         <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="relative flex items-center justify-between h-16">
+            {/* Logo ve Uygulama Adı */}
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center">
                 <Image src="/logo.webp" alt="Logo" width={32} height={32} className="mr-2" />
                 <span className="text-white font-bold text-lg">BütçemApp</span>
               </Link>
             </div>
-            
+
             {/* Desktop Menu */}
             <div className="hidden sm:block sm:ml-6">
               <div className="flex space-x-4">
@@ -223,7 +225,7 @@ export default function Status() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="-mr-2 flex sm:hidden">
+            <div className="flex sm:hidden">
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 type="button"
@@ -259,9 +261,9 @@ export default function Status() {
         )}
       </nav>
 
-      <main className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      <main className="pt-24 pb-16 px-2 sm:px-4 lg:px-8 w-full max-w-[95vw] sm:max-w-6xl mx-auto">
         <div className="bg-gray-900 rounded-lg shadow-xl p-6 sm:p-10 border border-gray-800">
-          <h2 className="text-3xl font-bold text-blue-400 mb-8 text-center">Finansal Durum</h2>
+          <h2 className="text-3xl font-bold text-white mb-8 text-center">Finansal Durum</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             <SummaryCard title="Toplam Gelir" amount={totalIncome} currency={selectedCurrency} type="income" formatCurrency={formatCurrency} />
@@ -369,7 +371,7 @@ function SummaryCard({ title, amount, currency, type, formatCurrency }: {
   type: 'income' | 'expense' | 'balance';
   formatCurrency: (amount: number, currency: Currency) => string;
 }) {
-  const bgColor = type === 'income' ? 'bg-green-900' : type === 'expense' ? 'bg-red-900' : 'bg-blue-900'
+  const bgColor = type === 'income' ? 'bg-green-600' : type === 'expense' ? 'bg-red-800' : 'bg-blue-900'
   return (
     <div className={`${bgColor} rounded-lg p-6 shadow-lg transition-transform hover:scale-105 border border-gray-700`}>
       <h3 className="text-lg font-semibold mb-2 text-gray-300">{title}</h3>
@@ -389,7 +391,7 @@ function TransactionSection({ title, transactions, onEdit, onDelete, formatDate,
 }) {
   return (
     <div>
-      <h3 className="text-2xl font-semibold mb-4 text-blue-400">{title}</h3>
+      <h3 className="text-2xl font-semibold mb-4 text-white">{title}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {transactions.map(transaction => (
           <TransactionCard
@@ -421,7 +423,7 @@ function TransactionCard({ transaction, onEdit, onDelete, formatDate, formatFreq
   return (
     <div className="bg-gray-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow border border-gray-700">
       <div className="flex justify-between items-start mb-4">
-        <h4 className="font-semibold text-lg text-blue-300">{transaction.description}</h4>
+        <h4 className="font-semibold text-lg text-white">{transaction.description}</h4>
         <div className="flex space-x-2">
           <button
             onClick={() => onEdit(transaction)}

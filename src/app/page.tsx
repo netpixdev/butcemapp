@@ -153,9 +153,9 @@ export default function Home() {
               </div>
               <div className="sm:w-2/3 sm:pl-8">
                 <h1 className="font-bold mb-4">
-                  <span className="block text-4xl sm:text-5xl lg:text-6xl">ButcemApp</span>
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl">BütçemApp</span>
                   <span className="block text-lg sm:text-xl mt-2 font-normal text-gray-300">
-                    Açık kaynaklı Gelir & giderlerinizi takip etme uygulaması. Basit, hızlı ve güvenli!
+                    Açık kaynaklı gelir & giderlerinizi takip etme uygulaması. Basit, hızlı ve güvenli!
                   </span>
                 </h1>
                 <p className="text-sm sm:text-base mb-6 text-gray-400">
@@ -177,9 +177,16 @@ export default function Home() {
                           </svg>
                         </div>
                         <div className="flex flex-col">
-                          <span className="text-xs font-medium text-gray-500">Geliştirici:</span>
-                          <span className="text-xs font-medium text-gray-400">@netpixdev</span>
-                        </div>
+  <span className="text-xs font-medium text-gray-500">Geliştirici:</span>
+  <a 
+    href="https://github.com/netpixdev" 
+    target="_blank" 
+    rel="noopener noreferrer" 
+    className="text-xs font-medium text-gray-400 hover:text-blue-400 transition-colors"
+  >
+    @netpixdev
+  </a>
+</div>
                       </div>
                     </div>
 
